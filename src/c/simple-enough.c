@@ -32,18 +32,18 @@ static GColor get_hand_color() {
 
 // Load settings
 static void load_settings() {
-  s_invert_colors = persist_exists(MESSAGE_KEY_InvertColors) ? 
-                    persist_read_bool(MESSAGE_KEY_InvertColors) : false;
+  s_invert_colors = persist_exists(MESSAGE_KEY_INVERT_COLORS) ? 
+                    persist_read_bool(MESSAGE_KEY_INVERT_COLORS) : false;
 }
 
 // Save settings
 static void save_settings() {
-  persist_write_bool(MESSAGE_KEY_InvertColors, s_invert_colors);
+  persist_write_bool(MESSAGE_KEY_INVERT_COLORS, s_invert_colors);
 }
 
 // Inbox received callback
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
-  Tuple *invert_tuple = dict_find(iterator, MESSAGE_KEY_InvertColors);
+  Tuple *invert_tuple = dict_find(iterator, MESSAGE_KEY_INVERT_COLORS);
   
   if (invert_tuple) {
     s_invert_colors = invert_tuple->value->int32 == 1;

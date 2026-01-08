@@ -12,7 +12,7 @@ module.exports = [
       },
       {
         "type": "toggle",
-        "messageKey": "InvertColors",
+        "messageKey": "INVERT_COLORS",
         "label": "Invert Colors",
         "description": "Switch between light and dark theme.",
         "defaultValue": false
