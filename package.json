@@ -1,10 +1,14 @@
 {
   "name": "simple-enough",
   "author": "MakeAwesomeHappen",
-  "version": "1.0.0",
-  "keywords": ["pebble-app"],
+  "version": "2.0.0",
+  "keywords": [
+    "pebble-app"
+  ],
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "@rebble/clay": "^1.0.6"
+  },
   "pebble": {
     "displayName": "simple-enough",
     "uuid": "fe189c1f-5846-43c7-aa83-81ae5dfe2049",
@@ -19,13 +23,16 @@
       "flint"
     ],
     "watchapp": {
-      "watchface": false
+      "watchface": true
     },
     "messageKeys": [
-      "dummy"
+      "InvertColors"
     ],
     "resources": {
       "media": []
-    }
+    },
+    "capabilities": [
+      "configurable"
+    ]
   }
 }

@@ -6,17 +6,63 @@ static Layer *s_canvas_layer;
 // Time tracking
 static struct tm s_last_time;
 
+// Settings
+static bool s_invert_colors = false;
+
+// Color helper functions
+static GColor get_background_color() {
+  return s_invert_colors ? GColorBlack : GColorWhite;
+}
+
+static GColor get_line_color() {
+  return s_invert_colors ? GColorDarkGray : GColorLightGray;
+}
+
+static GColor get_accent_color() {
+  return s_invert_colors ? GColorWhite : GColorBlack;
+}
+
+static GColor get_hand_color() {
+  #ifdef PBL_COLOR
+    return GColorRed;  // Always red on color screens
+  #else
+    return s_invert_colors ? GColorWhite : GColorBlack;  // Reverse on b/w screens
+  #endif
+}
+
+// Load settings
+static void load_settings() {
+  s_invert_colors = persist_exists(MESSAGE_KEY_InvertColors) ? 
+                    persist_read_bool(MESSAGE_KEY_InvertColors) : false;
+}
+
+// Save settings
+static void save_settings() {
+  persist_write_bool(MESSAGE_KEY_InvertColors, s_invert_colors);
+}
+
+// Inbox received callback
+static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+  Tuple *invert_tuple = dict_find(iterator, MESSAGE_KEY_InvertColors);
+  
+  if (invert_tuple) {
+    s_invert_colors = invert_tuple->value->int32 == 1;
+    save_settings();
+    layer_mark_dirty(s_canvas_layer);
+  }
+}
+
 // Drawing the clock face
 static void canvas_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   GPoint center = grect_center_point(&bounds);
   
-  // Set background to white
-  graphics_context_set_fill_color(ctx, GColorWhite);
+  // Set background
+  graphics_context_set_fill_color(ctx, get_background_color());
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
   
   // Draw radial lines (12 segments)
-  graphics_context_set_stroke_color(ctx, GColorLightGray);
+  graphics_context_set_stroke_color(ctx, get_line_color());
   graphics_context_set_stroke_width(ctx, 1);
   
   // Use a large enough radius to ensure all lines reach edges
@@ -32,7 +78,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   }
   
   // Draw thicker lines for 12, 3, and 9 o'clock (50px from center)
-  graphics_context_set_stroke_color(ctx, GColorBlack);
+  graphics_context_set_stroke_color(ctx, get_accent_color());
   graphics_context_set_stroke_width(ctx, 2);
   
   // 12 o'clock (top)
@@ -60,15 +106,15 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   graphics_draw_line(ctx, center, line_9);
   
   // Draw white circle behind hands
-  graphics_context_set_fill_color(ctx, GColorWhite);
+  graphics_context_set_fill_color(ctx, get_background_color());
   graphics_fill_circle(ctx, center, 20);
   
-  // Draw white background behind number 6
-  graphics_context_set_fill_color(ctx, GColorWhite);
+  // Draw background behind number 6
+  graphics_context_set_fill_color(ctx, get_background_color());
   graphics_fill_rect(ctx, GRect(center.x - 9, bounds.size.h - 70, 18, 27), 0, GCornerNone);
 
   // Draw large number 6 at bottom
-  graphics_context_set_text_color(ctx, GColorBlack);
+  graphics_context_set_text_color(ctx, get_accent_color());
   graphics_draw_text(ctx, "6",
                     fonts_get_system_font(FONT_KEY_LECO_32_BOLD_NUMBERS),
                     GRect(0, bounds.size.h - 77, bounds.size.w, 50),
@@ -84,7 +130,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   
   // Draw hour hand (shorter, thicker, red)
   graphics_context_set_stroke_width(ctx, 3);
-  graphics_context_set_stroke_color(ctx, GColorRed);
+  graphics_context_set_stroke_color(ctx, get_hand_color());
   GPoint hour_hand = {
     .x = (int16_t)(sin_lookup(hour_angle) * (bounds.size.w / 2 - 50) / TRIG_MAX_RATIO) + center.x,
     .y = (int16_t)(-cos_lookup(hour_angle) * (bounds.size.h / 2 - 50) / TRIG_MAX_RATIO) + center.y,
@@ -97,7 +143,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   
   // Draw minute hand (longer, medium thickness, red)
   graphics_context_set_stroke_width(ctx, 3);
-  graphics_context_set_stroke_color(ctx, GColorRed);
+  graphics_context_set_stroke_color(ctx, get_hand_color());
   GPoint minute_hand = {
     .x = (int16_t)(sin_lookup(minute_angle) * (bounds.size.w / 2 - 30) / TRIG_MAX_RATIO) + center.x,
     .y = (int16_t)(-cos_lookup(minute_angle) * (bounds.size.h / 2 - 30) / TRIG_MAX_RATIO) + center.y,
@@ -144,9 +190,12 @@ static void main_window_unload(Window *window) {
 
 // App initialization
 static void init() {
+  // Load settings
+  load_settings();
+  
   // Create main window
   s_main_window = window_create();
-  window_set_background_color(s_main_window, GColorWhite);
+  window_set_background_color(s_main_window, get_background_color());
   window_set_window_handlers(s_main_window, (WindowHandlers) {
     .load = main_window_load,
     .unload = main_window_unload,
@@ -155,6 +204,10 @@ static void init() {
   
   // Register with TickTimerService
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  
+  // Register callbacks
+  app_message_register_inbox_received(inbox_received_callback);
+  app_message_open(128, 128);
 }
 
 // App deinitialization
