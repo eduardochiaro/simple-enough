@@ -20,7 +20,7 @@ A minimalist analog watchface for Pebble smartwatches inspired by clean, modern 
 ![Emery 2](assets/emery_2.png)
 
 ## Store
-[Rebble App Store](https://apps.rebble.io/en_US/application/)
+[Rebble App Store](https://apps.rebble.io/en_US/application/6960135be386d90009527f25)
 
 
 ## Platform Support
