@@ -22,7 +22,14 @@ static GColor get_accent_color() {
   return s_invert_colors ? GColorWhite : GColorBlack;
 }
 
-static GColor get_hand_color() {
+static GColor get_hand_hour_color() {
+  #ifdef PBL_COLOR
+    return GColorDarkCandyAppleRed;  // Always red on color screens
+  #else
+    return s_invert_colors ? GColorWhite : GColorBlack;  // Reverse on b/w screens
+  #endif
+}
+static GColor get_hand_minute_color() {
   #ifdef PBL_COLOR
     return GColorRed;  // Always red on color screens
   #else
@@ -130,36 +137,40 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   
   // Draw hour hand (shorter, thicker, red)
   graphics_context_set_stroke_width(ctx, 3);
-  graphics_context_set_stroke_color(ctx, get_hand_color());
+  graphics_context_set_stroke_color(ctx, get_hand_hour_color());
   GPoint hour_hand = {
-    .x = (int16_t)(sin_lookup(hour_angle) * (bounds.size.w / 2 - 50) / TRIG_MAX_RATIO) + center.x,
-    .y = (int16_t)(-cos_lookup(hour_angle) * (bounds.size.h / 2 - 50) / TRIG_MAX_RATIO) + center.y,
+    .x = (int16_t)(sin_lookup(hour_angle) * (bounds.size.w / 2 - PBL_IF_RECT_ELSE(25, 40)) / TRIG_MAX_RATIO) + center.x,
+    .y = (int16_t)(-cos_lookup(hour_angle) * (bounds.size.h / 2 - PBL_IF_RECT_ELSE(25, 40)) / TRIG_MAX_RATIO) + center.y,
   };
   GPoint hour_hand_tail = {
     .x = (int16_t)(-sin_lookup(hour_angle) * 16 / TRIG_MAX_RATIO) + center.x,
     .y = (int16_t)(cos_lookup(hour_angle) * 16 / TRIG_MAX_RATIO) + center.y,
   };
-  graphics_draw_line(ctx, hour_hand_tail, hour_hand);
+  // Draw from tail through center to tip
+  graphics_draw_line(ctx, hour_hand_tail, center);
+  graphics_draw_line(ctx, center, hour_hand);
   
   // Draw minute hand (longer, medium thickness, red)
   graphics_context_set_stroke_width(ctx, 3);
-  graphics_context_set_stroke_color(ctx, get_hand_color());
+  graphics_context_set_stroke_color(ctx, get_hand_minute_color());
   GPoint minute_hand = {
-    .x = (int16_t)(sin_lookup(minute_angle) * (bounds.size.w / 2 - 30) / TRIG_MAX_RATIO) + center.x,
-    .y = (int16_t)(-cos_lookup(minute_angle) * (bounds.size.h / 2 - 30) / TRIG_MAX_RATIO) + center.y,
+    .x = (int16_t)(sin_lookup(minute_angle) * (bounds.size.w / 2 - PBL_IF_RECT_ELSE(10, 25)) / TRIG_MAX_RATIO) + center.x,
+    .y = (int16_t)(-cos_lookup(minute_angle) * (bounds.size.h / 2 - PBL_IF_RECT_ELSE(10, 25)) / TRIG_MAX_RATIO) + center.y,
   };
   GPoint minute_hand_tail = {
     .x = (int16_t)(-sin_lookup(minute_angle) * 16 / TRIG_MAX_RATIO) + center.x,
     .y = (int16_t)(cos_lookup(minute_angle) * 16 / TRIG_MAX_RATIO) + center.y,
   };
-  graphics_draw_line(ctx, minute_hand_tail, minute_hand);
+  // Draw from tail through center to tip
+  graphics_draw_line(ctx, minute_hand_tail, center);
+  graphics_draw_line(ctx, center, minute_hand);
   
   // Draw center circle with red border
   graphics_context_set_stroke_color(ctx, GColorRed);
   graphics_context_set_stroke_width(ctx, 2);
-  graphics_draw_circle(ctx, center, 5);
+  graphics_draw_circle(ctx, center, 4);
   graphics_context_set_fill_color(ctx, GColorWhite);
-  graphics_fill_circle(ctx, center, 4);
+  graphics_fill_circle(ctx, center, 3);
 }
 
 // Update time
