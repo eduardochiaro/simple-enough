@@ -139,8 +139,8 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   graphics_context_set_stroke_width(ctx, 3);
   graphics_context_set_stroke_color(ctx, get_hand_hour_color());
   GPoint hour_hand = {
-    .x = (int16_t)(sin_lookup(hour_angle) * (bounds.size.w / 2 - PBL_IF_RECT_ELSE(25, 40)) / TRIG_MAX_RATIO) + center.x,
-    .y = (int16_t)(-cos_lookup(hour_angle) * (bounds.size.h / 2 - PBL_IF_RECT_ELSE(25, 40)) / TRIG_MAX_RATIO) + center.y,
+    .x = (int16_t)(sin_lookup(hour_angle) * (bounds.size.w / 2 - PBL_IF_RECT_ELSE(28, 44)) / TRIG_MAX_RATIO) + center.x,
+    .y = (int16_t)(-cos_lookup(hour_angle) * (bounds.size.w / 2 - PBL_IF_RECT_ELSE(28, 44)) / TRIG_MAX_RATIO) + center.y,
   };
   GPoint hour_hand_tail = {
     .x = (int16_t)(-sin_lookup(hour_angle) * 16 / TRIG_MAX_RATIO) + center.x,
@@ -154,8 +154,8 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   graphics_context_set_stroke_width(ctx, 3);
   graphics_context_set_stroke_color(ctx, get_hand_minute_color());
   GPoint minute_hand = {
-    .x = (int16_t)(sin_lookup(minute_angle) * (bounds.size.w / 2 - PBL_IF_RECT_ELSE(10, 25)) / TRIG_MAX_RATIO) + center.x,
-    .y = (int16_t)(-cos_lookup(minute_angle) * (bounds.size.h / 2 - PBL_IF_RECT_ELSE(10, 25)) / TRIG_MAX_RATIO) + center.y,
+    .x = (int16_t)(sin_lookup(minute_angle) * (bounds.size.w / 2 - PBL_IF_RECT_ELSE(8, 22)) / TRIG_MAX_RATIO) + center.x,
+    .y = (int16_t)(-cos_lookup(minute_angle) * (bounds.size.w / 2 - PBL_IF_RECT_ELSE(8, 22)) / TRIG_MAX_RATIO) + center.y,
   };
   GPoint minute_hand_tail = {
     .x = (int16_t)(-sin_lookup(minute_angle) * 16 / TRIG_MAX_RATIO) + center.x,
