@@ -120,15 +120,15 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 
   
   // Draw PDC number 6 at bottom
-  const int top_padding = PBL_IF_RECT_ELSE(35, 40);
+  const int top_padding = 22;
   if (s_number_6_black && s_number_6_white) {
     GSize img_size = gdraw_command_image_get_bounds_size(s_invert_colors ? s_number_6_white : s_number_6_black);
 
     // Draw background for number 6
     graphics_context_set_fill_color(ctx, get_background_color());
-    graphics_fill_rect(ctx, GRect(center.x - (img_size.w - 4) / 2, bounds.size.h - img_size.h - top_padding - 4, img_size.w - 4, img_size.h + 8), 2, GCornersAll);
+    graphics_fill_rect(ctx, GRect(center.x - (img_size.w - 4) / 2, (bounds.size.h / 2) + top_padding - 4, img_size.w - 4, img_size.h + 8), 2, GCornersAll);
     
-    GRect img_rect = GRect(center.x - img_size.w / 2, bounds.size.h - img_size.h - top_padding, img_size.w, img_size.h);
+    GRect img_rect = GRect(center.x - img_size.w / 2, (bounds.size.h / 2) + top_padding, img_size.w, img_size.h);
     gdraw_command_image_draw(ctx, s_invert_colors ? s_number_6_white : s_number_6_black, img_rect.origin);
   }
   
