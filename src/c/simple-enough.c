@@ -2,6 +2,8 @@
 
 static Window *s_main_window;
 static Layer *s_canvas_layer;
+static GDrawCommandImage *s_number_6_white;
+static GDrawCommandImage *s_number_6_black;
 
 // Time tracking
 static struct tm s_last_time;
@@ -115,17 +117,20 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   // Draw white circle behind hands
   graphics_context_set_fill_color(ctx, get_background_color());
   graphics_fill_circle(ctx, center, 20);
-  
-  // Draw background behind number 6
-  graphics_context_set_fill_color(ctx, get_background_color());
-  graphics_fill_rect(ctx, GRect(center.x - 9, bounds.size.h - 70, 18, 27), 0, GCornerNone);
 
-  // Draw large number 6 at bottom
-  graphics_context_set_text_color(ctx, get_accent_color());
-  graphics_draw_text(ctx, "6",
-                    fonts_get_system_font(FONT_KEY_LECO_32_BOLD_NUMBERS),
-                    GRect(0, bounds.size.h - 77, bounds.size.w, 50),
-                    GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  
+  // Draw PDC number 6 at bottom
+  const int top_padding = PBL_IF_RECT_ELSE(35, 40);
+  if (s_number_6_black && s_number_6_white) {
+    GSize img_size = gdraw_command_image_get_bounds_size(s_invert_colors ? s_number_6_white : s_number_6_black);
+
+    // Draw background for number 6
+    graphics_context_set_fill_color(ctx, get_background_color());
+    graphics_fill_rect(ctx, GRect(center.x - (img_size.w - 4) / 2, bounds.size.h - img_size.h - top_padding - 4, img_size.w - 4, img_size.h + 8), 2, GCornersAll);
+    
+    GRect img_rect = GRect(center.x - img_size.w / 2, bounds.size.h - img_size.h - top_padding, img_size.w, img_size.h);
+    gdraw_command_image_draw(ctx, s_invert_colors ? s_number_6_white : s_number_6_black, img_rect.origin);
+  }
   
   // Calculate time values
   int hour = s_last_time.tm_hour % 12;
@@ -184,6 +189,10 @@ static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
   
+  // Load NUMBER_6 PDC resource
+  s_number_6_white = gdraw_command_image_create_with_resource(RESOURCE_ID_NUMBER_6_WHITE);
+  s_number_6_black = gdraw_command_image_create_with_resource(RESOURCE_ID_NUMBER_6_BLACK);
+  
   // Create canvas layer
   s_canvas_layer = layer_create(bounds);
   layer_set_update_proc(s_canvas_layer, canvas_update_proc);
@@ -197,6 +206,8 @@ static void main_window_load(Window *window) {
 // Window unload
 static void main_window_unload(Window *window) {
   layer_destroy(s_canvas_layer);
+  gdraw_command_image_destroy(s_number_6_white);
+  gdraw_command_image_destroy(s_number_6_black);
 }
 
 // App initialization
